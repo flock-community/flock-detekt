@@ -28,6 +28,11 @@ subprojects {
         mavenCentral()
     }
 
+    configure<JavaPluginExtension> {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
     dependencies {
         val detektVersion = rootProject.libs.versions.detekt.get()
         "compileOnly"("dev.detekt:detekt-api:$detektVersion")
