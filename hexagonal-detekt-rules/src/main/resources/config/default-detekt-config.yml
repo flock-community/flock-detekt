@@ -1,0 +1,94 @@
+hexagonal:
+  active: true
+
+  # Domain Rules
+  DomainNoPrimitiveObsession:
+    active: true
+    domainPackages: ['domain', 'core']
+    allowedPrimitives: []  # None by default
+
+  DomainNoFrameworkImports:
+    active: true
+    domainPackages: ['domain', 'core']
+    forbiddenImports:
+      - 'org.springframework'
+      - 'io.ktor'
+      - 'jakarta'
+      - 'javax.servlet'
+      - 'io.micronaut'
+      - 'io.quarkus'
+      - 'org.hibernate'
+      - 'org.jooq'
+
+  DomainMustBeImmutable:
+    active: true
+    domainPackages: ['domain', 'core']
+
+  ValueClassMustHaveJvmInline:
+    active: true
+    domainPackages: ['domain', 'core']
+    checkOnlyInDomain: false  # Check all value classes by default
+
+  # Port Rules
+  PortMustBeInterface:
+    active: true
+    portPackages: ['port', 'ports']
+    portSuffixes: ['Port', 'Repository', 'Gateway', 'Client']
+
+  PortNamingConvention:
+    active: true
+    portPackages: ['port', 'ports']
+    allowedSuffixes: ['Port', 'Repository', 'Gateway', 'Client']
+
+  PortsInDomainOnly:
+    active: true
+    domainPackages: ['domain', 'core']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    portSuffixes: ['Port', 'Repository', 'Gateway', 'Client']
+
+  # Adapter Rules
+  AdapterMustImplementPort:
+    active: true
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    adapterPatterns: ['.*Adapter', 'Mock.*', '.*Impl', '.*Client']
+
+  AdapterNamingConvention:
+    active: true
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    allowedPatterns: ['.*Adapter', 'Mock.*', '.*Impl', '.*Client']
+    portSuffixes: ['Port', 'Repository', 'Gateway', 'Client']
+
+  AdapterCannotDependOnAdapter:
+    active: true
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+
+  # Dependency Rules
+  DomainCannotDependOnAdapters:
+    active: true
+    domainPackages: ['domain', 'core']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+
+  DomainCannotDependOnApi:
+    active: true
+    domainPackages: ['domain', 'core']
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+
+  ApiCannotDependOnAdapters:
+    active: true
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+
+  # Layering Rules
+  DtoOnlyInAdaptersOrApi:
+    active: true
+    domainPackages: ['domain', 'core']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    dtoSuffixes: ['Dto', 'Request', 'Response']
+
+  NoServiceInApiOrAdapter:
+    active: true
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    serviceSuffixes: ['Service']

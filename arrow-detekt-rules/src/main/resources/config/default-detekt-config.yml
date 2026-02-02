@@ -1,0 +1,18 @@
+arrow:
+  active: true
+
+  # Typed Error Handling Rules
+  NoThrowInDomainOrAdapters:
+    active: true
+    domainPackages: ['domain', 'core']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+
+  DomainServiceMustUseRaise:
+    active: true
+    domainPackages: ['domain', 'core']
+    serviceSuffixes: ['Service', 'UseCase', 'Handler']
+
+  ErrorTypeMustBeSealedInterface:
+    active: true
+    domainPackages: ['domain', 'core']
+    errorSuffixes: ['Error', 'Failure']
