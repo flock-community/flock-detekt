@@ -73,12 +73,8 @@ subprojects {
     }
 
     configure<SigningExtension> {
-        val signingKey = providers.environmentVariable("GPG_PRIVATE_KEY")
-        val signingPassword = providers.environmentVariable("GPG_PASSPHRASE")
-        if (signingKey.isPresent && signingPassword.isPresent) {
-            useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
-            sign(extensions.getByType<PublishingExtension>().publications["maven"])
-        }
+        useGpgCmd()
+        sign(extensions.getByType<PublishingExtension>().publications["maven"])
     }
 }
 

@@ -33,6 +33,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
