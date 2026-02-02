@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
@@ -46,6 +46,7 @@ jobs:
         id: check-snapshot
         run: |
           VERSION=$(grep -oP 'version = "\K[^"]+' build.gradle.kts | head -1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
           if [[ "$VERSION" == *"-SNAPSHOT"* ]]; then
             echo "is_snapshot=true" >> $GITHUB_OUTPUT
             echo "Detected SNAPSHOT version: $VERSION"
@@ -61,3 +62,33 @@ jobs:
       - name: Publish to Maven Central
         if: steps.check-snapshot.outputs.is_snapshot == 'false'
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+
+      - name: Create GitHub Release
+        if: steps.check-snapshot.outputs.is_snapshot == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.check-snapshot.outputs.version }}" \
+            --title "Release ${{ steps.check-snapshot.outputs.version }}" \
+            --generate-notes
+
+      - name: Bump to next minor snapshot
+        if: steps.check-snapshot.outputs.is_snapshot == 'false'
+        run: |
+          VERSION="${{ steps.check-snapshot.outputs.version }}"
+          # Parse version components (e.g., 1.0.0 -> major=1, minor=0, patch=0)
+          IFS='.' read -r major minor patch <<< "$VERSION"
+          # Increment minor, reset patch
+          NEXT_VERSION="${major}.$((minor + 1)).0-SNAPSHOT"
+          # Update build.gradle.kts
+          sed -i "s/version = \"$VERSION\"/version = \"$NEXT_VERSION\"/" build.gradle.kts
+          echo "Bumped version from $VERSION to $NEXT_VERSION"
+
+      - name: Commit and push version bump
+        if: steps.check-snapshot.outputs.is_snapshot == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add build.gradle.kts
+          git commit -m "Bump version to ${{ steps.check-snapshot.outputs.version }} -> next minor snapshot"
+          git push
