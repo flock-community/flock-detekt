@@ -8,8 +8,8 @@ nexusPublishing {
         sonatype {
             nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
             snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
-            username.set(providers.environmentVariable("OSSRH_USERNAME"))
-            password.set(providers.environmentVariable("OSSRH_PASSWORD"))
+            username.set(providers.environmentVariable("SONATYPE_USERNAME"))
+            password.set(providers.environmentVariable("SONATYPE_PASSWORD"))
         }
     }
 }
@@ -71,8 +71,8 @@ subprojects {
     }
 
     configure<SigningExtension> {
-        val signingKey = providers.environmentVariable("GPG_SIGNING_KEY")
-        val signingPassword = providers.environmentVariable("GPG_SIGNING_PASSWORD")
+        val signingKey = providers.environmentVariable("GPG_PRIVATE_KEY")
+        val signingPassword = providers.environmentVariable("GPG_PASSPHRASE")
         if (signingKey.isPresent && signingPassword.isPresent) {
             useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
             sign(extensions.getByType<PublishingExtension>().publications["maven"])
