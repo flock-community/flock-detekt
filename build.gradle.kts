@@ -3,6 +3,11 @@ plugins {
     alias(libs.plugins.nexus.publish)
 }
 
+allprojects {
+    group = "community.flock"
+    version = "1.0.0-SNAPSHOT"
+}
+
 nexusPublishing {
     repositories {
         sonatype {
@@ -18,9 +23,6 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
-
-    group = "community.flock"
-    version = "1.0.0-SNAPSHOT"
 
     repositories {
         mavenCentral()
