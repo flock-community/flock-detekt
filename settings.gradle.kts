@@ -4,3 +4,4 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include("hexagonal-detekt-rules")
 include("arrow-detekt-rules")
+include("wirespec-detekt-rules")

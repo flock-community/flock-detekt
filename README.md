@@ -6,10 +6,10 @@ These rules are particularly useful for guiding **AI coding agents** (Copilot, C
 
 ## Modules
 
-| Module | Rules | Purpose |
-|--------|-------|---------|
-| `hexagonal-detekt-rules` | 15 | Enforce hexagonal/ports & adapters architecture |
-| `arrow-detekt-rules` | 3 | Enforce typed error handling with Arrow |
+| Module | RuleSets | Rules | Purpose |
+|--------|----------|-------|---------|
+| `hexagonal-detekt-rules` | 5 | 16 | Enforce hexagonal/ports & adapters architecture |
+| `arrow-detekt-rules` | 1 | 3 | Enforce typed error handling with Arrow |
 
 ## Installation
 
@@ -50,8 +50,8 @@ configurations.matching { it.name == "detekt" }.all {
 }
 
 dependencies {
-    detektPlugins("community.flock:hexagonal-detekt-rules:1.0.0")
-    detektPlugins("community.flock:arrow-detekt-rules:1.0.0")  // optional
+    detektPlugins("community.flock:hexagonal-detekt-rules:1.1.0")
+    detektPlugins("community.flock:arrow-detekt-rules:1.1.0")  // optional
 }
 
 detekt {
@@ -62,11 +62,22 @@ detekt {
 
 ### 3. Create detekt.yml in your module
 
-See [Configuration](#configuration) below for a full example.
+See [Configuration](#configuration) below for examples by module type.
 
-## Hexagonal Architecture Rules
+## Hexagonal Architecture RuleSets
 
-### Domain Layer
+The hexagonal rules are organized into **5 layer-specific rulesets** that can be enabled/disabled as a group. This allows each module to enable only the rules relevant to its architectural layer.
+
+| RuleSet | Rules | Target Modules |
+|---------|-------|----------------|
+| `hexagonal-domain` | 4 | domain |
+| `hexagonal-port` | 3 | domain |
+| `hexagonal-adapter` | 3 | adapters/* |
+| `hexagonal-dependency` | 4 | varies |
+| `hexagonal-layering` | 2 | all |
+
+### hexagonal-domain
+
 | Rule | Description |
 |------|-------------|
 | `DomainNoPrimitiveObsession` | Prevents primitive types in domain data classes — use value classes |
@@ -74,28 +85,33 @@ See [Configuration](#configuration) below for a full example.
 | `DomainNoFrameworkImports` | Blocks Spring, Ktor, Jakarta, etc. imports in domain |
 | `ValueClassMustHaveJvmInline` | Requires `@JvmInline` on value classes |
 
-### Ports
+### hexagonal-port
+
 | Rule | Description |
 |------|-------------|
 | `PortMustBeInterface` | Ports must be interfaces, not classes |
 | `PortNamingConvention` | Ports must end with `Port`, `Repository`, `Gateway`, or `Client` |
 | `PortsInDomainOnly` | Ports can only be defined in domain packages |
 
-### Adapters
+### hexagonal-adapter
+
 | Rule | Description |
 |------|-------------|
 | `AdapterMustImplementPort` | Adapters must implement a port interface |
 | `AdapterNamingConvention` | Adapters must follow naming patterns (`*Adapter`, `*Impl`, `Mock*`) |
 | `AdapterCannotDependOnAdapter` | Prevents cross-adapter dependencies |
 
-### Dependencies
+### hexagonal-dependency
+
 | Rule | Description |
 |------|-------------|
 | `DomainCannotDependOnAdapters` | Domain cannot import adapter code |
 | `DomainCannotDependOnApi` | Domain cannot import API layer code |
 | `ApiCannotDependOnAdapters` | API layer cannot import adapter implementations |
+| `ApiCannotDependOnPorts` | API layer should use domain services, not ports directly |
 
-### Layering
+### hexagonal-layering
+
 | Rule | Description |
 |------|-------------|
 | `DtoOnlyInAdaptersOrApi` | DTOs/Request/Response classes only in adapters or API |
@@ -111,28 +127,107 @@ See [Configuration](#configuration) below for a full example.
 
 ## Configuration
 
-```yaml
-# detekt.yml
-hexagonal:
-  DomainNoPrimitiveObsession:
-    active: true
-    domainPackages: ['domain', 'core']
-  DomainNoFrameworkImports:
-    active: true
-    forbiddenImports:
-      - 'org.springframework'
-      - 'io.ktor'
-      - 'jakarta'
-  AdapterNamingConvention:
-    active: true
-    adapterPatterns: ['.*Adapter', 'Mock.*', '.*Impl', '.*Client']
+### Domain Module
 
-arrow:
-  NoThrowInDomainOrAdapters:
-    active: true
-  DomainServiceMustUseRaise:
-    active: true
-    serviceSuffixes: ['Service', 'UseCase', 'Handler']
+```yaml
+# domain/detekt.yml
+hexagonal-domain:
+  active: true
+  DomainNoPrimitiveObsession:
+    domainPackages: ['domain']
+  DomainNoFrameworkImports:
+    domainPackages: ['domain']
+    forbiddenImports:
+      - 'io.ktor'
+      - 'jakarta.persistence'
+
+hexagonal-port:
+  active: true
+  PortsInDomainOnly:
+    domainPackages: ['domain']
+
+hexagonal-adapter:
+  active: false
+
+hexagonal-dependency:
+  active: true
+  ApiCannotDependOnAdapters:
+    active: false
+  ApiCannotDependOnPorts:
+    active: false
+
+hexagonal-layering:
+  active: true
+```
+
+### API Module
+
+```yaml
+# api/detekt.yml
+hexagonal-domain:
+  active: false
+
+hexagonal-port:
+  active: false
+
+hexagonal-adapter:
+  active: false
+
+hexagonal-dependency:
+  active: true
+  DomainCannotDependOnAdapters:
+    active: false
+  DomainCannotDependOnApi:
+    active: false
+  ApiCannotDependOnAdapters:
+    apiPackages: ['api']
+  ApiCannotDependOnPorts:
+    apiPackages: ['api']
+
+hexagonal-layering:
+  active: true
+```
+
+### Adapter Module
+
+```yaml
+# adapters/*/detekt.yml
+hexagonal-domain:
+  active: false
+
+hexagonal-port:
+  active: false
+
+hexagonal-adapter:
+  active: true
+  AdapterMustImplementPort:
+    adapterPatterns: ['.*Adapter', 'Mock.*', '.*Impl', '.*Client', '.*Repository']
+
+hexagonal-dependency:
+  active: false
+
+hexagonal-layering:
+  active: false
+```
+
+### App Module (Composition Root)
+
+```yaml
+# app/detekt.yml - disable all hexagonal rules
+hexagonal-domain:
+  active: false
+
+hexagonal-port:
+  active: false
+
+hexagonal-adapter:
+  active: false
+
+hexagonal-dependency:
+  active: false
+
+hexagonal-layering:
+  active: false
 ```
 
 ## Architecture Enforced
@@ -173,6 +268,41 @@ arrow:
         • Domain defines ports for external dependencies
         • Driven adapters (DB, HTTP clients, queues) implement ports
         • Dependencies always point inward
+```
+
+## Migration from v1.0.x
+
+Version 1.1.0 replaces the single `hexagonal` ruleset with 5 layer-specific rulesets. Update your `detekt.yml` files:
+
+**Before (v1.0.x):**
+```yaml
+hexagonal:
+  DomainNoPrimitiveObsession:
+    active: false
+  DomainNoFrameworkImports:
+    active: false
+  # ... 10+ more disabled rules
+```
+
+**After (v1.1.0):**
+```yaml
+hexagonal-domain:
+  active: false
+```
+
+## Local Development
+
+To build and publish to Maven Local without GPG signing:
+
+```bash
+export ENABLE_GRADLE_SIGNING=false
+./gradlew publishToMavenLocal
+```
+
+Or add to your shell profile (`~/.zshrc` or `~/.bashrc`):
+
+```bash
+export ENABLE_GRADLE_SIGNING=false
 ```
 
 ## License

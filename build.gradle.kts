@@ -77,9 +77,12 @@ subprojects {
         }
     }
 
-    configure<SigningExtension> {
-        useGpgCmd()
-        sign(extensions.getByType<PublishingExtension>().publications["maven"])
+    val isSigningEnabled: Boolean = System.getenv("ENABLE_GRADLE_SIGNING")?.toBoolean() ?: true
+    if (isSigningEnabled) {
+        configure<SigningExtension> {
+            useGpgCmd()
+            sign(extensions.getByType<PublishingExtension>().publications["maven"])
+        }
     }
 }
 

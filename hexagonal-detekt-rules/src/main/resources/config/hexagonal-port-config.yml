@@ -1,0 +1,19 @@
+hexagonal-port:
+  active: true
+
+  PortMustBeInterface:
+    active: true
+    portPackages: ['port', 'ports']
+    portSuffixes: ['Port', 'Repository', 'Gateway', 'Client']
+
+  PortNamingConvention:
+    active: true
+    portPackages: ['port', 'ports']
+    allowedSuffixes: ['Port', 'Repository', 'Gateway', 'Client']
+
+  PortsInDomainOnly:
+    active: true
+    domainPackages: ['domain', 'core']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    portSuffixes: ['Port', 'Repository', 'Gateway', 'Client']

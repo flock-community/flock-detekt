@@ -1,1 +1,5 @@
-community.flock.detekt.hexagonal.HexagonalRuleSetProvider
+community.flock.detekt.hexagonal.DomainRuleSetProvider
+community.flock.detekt.hexagonal.PortRuleSetProvider
+community.flock.detekt.hexagonal.AdapterRuleSetProvider
+community.flock.detekt.hexagonal.DependencyRuleSetProvider
+community.flock.detekt.hexagonal.LayeringRuleSetProvider
