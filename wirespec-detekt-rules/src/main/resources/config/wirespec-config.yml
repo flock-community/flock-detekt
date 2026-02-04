@@ -1,0 +1,15 @@
+wirespec:
+  active: true
+
+  ControllerMustImplementWirespecHandler:
+    active: true
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    controllerAnnotations: ['RestController', 'Controller']
+    excludePackages: ['actuator', 'health', 'management', 'test']
+
+  NoManualSpringMappingAnnotations:
+    active: true
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    mappingAnnotations: ['GetMapping', 'PostMapping', 'PutMapping', 'DeleteMapping', 'PatchMapping', 'RequestMapping']
+    excludePackages: ['actuator', 'health', 'management', 'test']
+    allowOnOverrides: true

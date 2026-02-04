@@ -1,0 +1,15 @@
+hexagonal-layering:
+  active: true
+
+  DtoOnlyInAdaptersOrApi:
+    active: true
+    domainPackages: ['domain', 'core']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    dtoSuffixes: ['Dto', 'Request', 'Response']
+
+  NoServiceInApiOrAdapter:
+    active: true
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    serviceSuffixes: ['Service']

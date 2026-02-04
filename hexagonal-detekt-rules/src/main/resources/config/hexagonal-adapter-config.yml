@@ -1,0 +1,17 @@
+hexagonal-adapter:
+  active: true
+
+  AdapterMustImplementPort:
+    active: true
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    adapterPatterns: ['.*Adapter', 'Mock.*', '.*Impl', '.*Client']
+
+  AdapterNamingConvention:
+    active: true
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    allowedPatterns: ['.*Adapter', 'Mock.*', '.*Impl', '.*Client']
+    portSuffixes: ['Port', 'Repository', 'Gateway', 'Client']
+
+  AdapterCannotDependOnAdapter:
+    active: true
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']

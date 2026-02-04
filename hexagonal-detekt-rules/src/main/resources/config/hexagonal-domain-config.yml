@@ -1,0 +1,29 @@
+hexagonal-domain:
+  active: true
+
+  DomainNoPrimitiveObsession:
+    active: true
+    domainPackages: ['domain', 'core']
+    allowedPrimitives: []  # None by default
+
+  DomainNoFrameworkImports:
+    active: true
+    domainPackages: ['domain', 'core']
+    forbiddenImports:
+      - 'org.springframework'
+      - 'io.ktor'
+      - 'jakarta'
+      - 'javax.servlet'
+      - 'io.micronaut'
+      - 'io.quarkus'
+      - 'org.hibernate'
+      - 'org.jooq'
+
+  DomainMustBeImmutable:
+    active: true
+    domainPackages: ['domain', 'core']
+
+  ValueClassMustHaveJvmInline:
+    active: true
+    domainPackages: ['domain', 'core']
+    checkOnlyInDomain: false  # Check all value classes by default
