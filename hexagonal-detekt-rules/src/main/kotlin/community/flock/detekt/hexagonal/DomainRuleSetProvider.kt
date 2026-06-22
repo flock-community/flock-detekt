@@ -1,5 +1,6 @@
 package community.flock.detekt.hexagonal
 
+import community.flock.detekt.hexagonal.rules.domain.DomainModelMustBeStandalone
 import community.flock.detekt.hexagonal.rules.domain.DomainMustBeImmutable
 import community.flock.detekt.hexagonal.rules.domain.DomainNoFrameworkImports
 import community.flock.detekt.hexagonal.rules.domain.DomainNoPrimitiveObsession
@@ -15,6 +16,7 @@ class DomainRuleSetProvider : RuleSetProvider {
         listOf(
             ::DomainNoPrimitiveObsession,
             ::DomainNoFrameworkImports,
+            ::DomainModelMustBeStandalone,
             ::DomainMustBeImmutable,
             ::ValueClassMustHaveJvmInline,
         )

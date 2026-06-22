@@ -70,7 +70,7 @@ The hexagonal rules are organized into **5 layer-specific rulesets** that can be
 
 | RuleSet | Rules | Target Modules |
 |---------|-------|----------------|
-| `hexagonal-domain` | 4 | domain |
+| `hexagonal-domain` | 5 | domain |
 | `hexagonal-port` | 3 | domain |
 | `hexagonal-adapter` | 3 | adapters/* |
 | `hexagonal-dependency` | 4 | varies |
@@ -83,6 +83,7 @@ The hexagonal rules are organized into **5 layer-specific rulesets** that can be
 | `DomainNoPrimitiveObsession` | Prevents primitive types in domain data classes — use value classes |
 | `DomainMustBeImmutable` | Enforces `val` over `var` in domain classes |
 | `DomainNoFrameworkImports` | Blocks Spring, Ktor, Jakarta, etc. imports in domain |
+| `DomainModelMustBeStandalone` | Allow-lists domain imports so foreign models can't leak in (opt-in) |
 | `ValueClassMustHaveJvmInline` | Requires `@JvmInline` on value classes |
 
 ### hexagonal-port
@@ -140,6 +141,17 @@ hexagonal-domain:
     forbiddenImports:
       - 'io.ktor'
       - 'jakarta.persistence'
+  # Opt-in: enforce a fully self-contained domain model (allow-list instead of deny-list).
+  DomainModelMustBeStandalone:
+    active: true
+    domainPackages: ['domain']
+    allowedPackages:
+      - 'kotlin'
+      - 'kotlinx'
+      - 'java'
+      - 'javax.annotation'
+    additionalAllowedPackages:
+      - 'com.example.shared'  # intentionally shared value-object module
 
 hexagonal-port:
   active: true
