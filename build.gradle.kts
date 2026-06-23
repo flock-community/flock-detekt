@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "community.flock"
-    version = "1.1.0"
+    version = "1.2.0-SNAPSHOT"
 }
 
 nexusPublishing {
