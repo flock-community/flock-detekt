@@ -19,6 +19,17 @@ hexagonal-domain:
       - 'org.hibernate'
       - 'org.jooq'
 
+  DomainModelMustBeStandalone:
+    active: false  # opt-in; stricter than DomainNoFrameworkImports
+    domainPackages: ['domain', 'core']
+    allowedPackages:
+      - 'kotlin'
+      - 'kotlinx'
+      - 'java'
+      - 'javax.annotation'
+      # domainPackages are always implicitly allowed
+    additionalAllowedPackages: []  # project-specific allow-list extensions
+
   DomainMustBeImmutable:
     active: true
     domainPackages: ['domain', 'core']

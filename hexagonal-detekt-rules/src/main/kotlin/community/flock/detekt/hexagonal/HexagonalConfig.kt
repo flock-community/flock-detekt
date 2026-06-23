@@ -26,6 +26,13 @@ object HexagonalConfig {
         "org.jooq"
     )
 
+    val DEFAULT_DOMAIN_ALLOWED_PACKAGES = listOf(
+        "kotlin",
+        "kotlinx",
+        "java",
+        "javax.annotation"
+    )
+
     /**
      * Checks if the given file belongs to a package matching one of the patterns.
      */
@@ -73,6 +80,34 @@ object HexagonalConfig {
     fun isImportForbidden(importPath: String, forbiddenPatterns: List<String>): Boolean {
         return forbiddenPatterns.any { pattern ->
             importPath.startsWith(pattern) || importPath.startsWith("$pattern.")
+        }
+    }
+
+    /**
+     * Checks if an import statement is allowed for a standalone domain model.
+     *
+     * An import is allowed when its fully qualified name starts with one of the
+     * [allowedPackages] prefixes (matched on package-segment boundaries), or when it
+     * targets one of the [domainPackages] (the domain's own model is always allowed).
+     *
+     * This is the allow-list counterpart of [isImportForbidden]: everything that is not
+     * explicitly allowed is considered foreign to the domain.
+     */
+    fun isImportAllowed(
+        importPath: String,
+        allowedPackages: List<String>,
+        domainPackages: List<String>
+    ): Boolean {
+        val allowedByPrefix = allowedPackages.any { pattern ->
+            importPath == pattern || importPath.startsWith("$pattern.")
+        }
+        if (allowedByPrefix) return true
+
+        return domainPackages.any { pattern ->
+            importPath.contains(".$pattern.") ||
+                importPath.endsWith(".$pattern") ||
+                importPath.startsWith("$pattern.") ||
+                importPath == pattern
         }
     }
 
