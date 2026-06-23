@@ -64,6 +64,105 @@ detekt {
 
 See [Configuration](#configuration) below for examples by module type.
 
+## Using with Maven
+
+The rule sets are published to Maven Central as plain JVM artifacts, so they can be
+consumed from a Maven build too. Detekt 2.0 has no first-party Maven plugin, so the
+supported path is to run the [Detekt CLI](https://detekt.dev/docs/gettingstarted/cli/)
+via the [Maven Ant Task](https://detekt.dev/docs/gettingstarted/mavenanttask/), loading
+the custom rules through the CLI's `--plugins` flag.
+
+Two plugins are needed: `maven-dependency-plugin` resolves the rule jars into a known
+directory, and `maven-antrun-plugin` runs the detekt CLI against them.
+
+```xml
+<build>
+  <plugins>
+    <!-- 1. Resolve the Flock rule jars into target/detekt-plugins -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-dependency-plugin</artifactId>
+      <version>3.8.1</version>
+      <executions>
+        <execution>
+          <id>copy-detekt-plugins</id>
+          <phase>process-test-classes</phase>
+          <goals><goal>copy</goal></goals>
+          <configuration>
+            <stripVersion>true</stripVersion>
+            <outputDirectory>${project.build.directory}/detekt-plugins</outputDirectory>
+            <artifactItems>
+              <artifactItem>
+                <groupId>community.flock</groupId>
+                <artifactId>hexagonal-detekt-rules</artifactId>
+                <version>1.1.0</version>
+              </artifactItem>
+              <artifactItem>
+                <groupId>community.flock</groupId>
+                <artifactId>arrow-detekt-rules</artifactId>
+                <version>1.1.0</version>
+              </artifactItem>
+            </artifactItems>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+
+    <!-- 2. Run the detekt CLI with the rule jars passed via --plugins -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-antrun-plugin</artifactId>
+      <version>3.1.0</version>
+      <executions>
+        <execution>
+          <id>detekt</id>
+          <phase>verify</phase>
+          <goals><goal>run</goal></goals>
+          <configuration>
+            <target name="detekt">
+              <java taskname="detekt" dir="${basedir}"
+                    fork="true"
+                    failonerror="true"
+                    classname="dev.detekt.cli.Main"
+                    classpathref="maven.plugin.classpath">
+                <arg value="--input"/>
+                <arg value="${basedir}/src/main/kotlin"/>
+                <arg value="--config"/>
+                <arg value="${basedir}/detekt.yml"/>
+                <arg value="--build-upon-default-config"/>
+                <!-- Separate multiple jars with ':' (use ';' on Windows) -->
+                <arg value="--plugins"/>
+                <arg value="${project.build.directory}/detekt-plugins/hexagonal-detekt-rules.jar:${project.build.directory}/detekt-plugins/arrow-detekt-rules.jar"/>
+              </java>
+            </target>
+          </configuration>
+        </execution>
+      </executions>
+      <dependencies>
+        <dependency>
+          <groupId>dev.detekt</groupId>
+          <artifactId>detekt-cli</artifactId>
+          <version>2.0.0-alpha.1</version>
+        </dependency>
+      </dependencies>
+    </plugin>
+  </plugins>
+</build>
+```
+
+Run it with:
+
+```bash
+mvn verify
+```
+
+The `detekt.yml` and the per-layer rule set configuration are identical to the Gradle
+setup — see [Configuration](#configuration) below.
+
+> **Note:** keep the `detekt-cli` version aligned with the Detekt version these rules
+> were built against (`2.0.0-alpha.1`). Because Detekt 2.0 is pinned to a specific Kotlin
+> version, a mismatched CLI can fail to load the rule jars.
+
 ## Hexagonal Architecture RuleSets
 
 The hexagonal rules are organized into **5 layer-specific rulesets** that can be enabled/disabled as a group. This allows each module to enable only the rules relevant to its architectural layer.
