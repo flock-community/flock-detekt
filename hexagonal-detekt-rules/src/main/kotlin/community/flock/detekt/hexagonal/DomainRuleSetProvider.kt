@@ -6,10 +6,11 @@ import community.flock.detekt.hexagonal.rules.domain.DomainNoFrameworkImports
 import community.flock.detekt.hexagonal.rules.domain.DomainNoPrimitiveObsession
 import community.flock.detekt.hexagonal.rules.domain.ValueClassMustHaveJvmInline
 import dev.detekt.api.RuleSet
+import dev.detekt.api.RuleSetId
 import dev.detekt.api.RuleSetProvider
 
 class DomainRuleSetProvider : RuleSetProvider {
-    override val ruleSetId: RuleSet.Id = RuleSet.Id("hexagonal-domain")
+    override val ruleSetId: RuleSetId = RuleSetId("hexagonal-domain")
 
     override fun instance(): RuleSet = RuleSet(
         ruleSetId,

@@ -10,25 +10,41 @@ These rules are particularly useful for guiding **AI coding agents** (Copilot, C
 |--------|----------|-------|---------|
 | `hexagonal-detekt-rules` | 5 | 16 | Enforce hexagonal/ports & adapters architecture |
 | `arrow-detekt-rules` | 1 | 3 | Enforce typed error handling with Arrow |
+| `wirespec-detekt-rules` | 1 | 2 | Enforce [Wirespec](https://wirespec.io)-generated interfaces in controllers |
 
 ## Installation
 
-### Prerequisites
+### Compatibility
 
-| Detekt Version | Kotlin Version | Gradle |
-|----------------|----------------|--------|
-| 2.0.0-alpha.2 | 2.3.0 | 9.3.0 |
-| 2.0.0-alpha.1 | 2.2.20 | 9.1.0 |
-| 2.0.0-alpha.0 | 2.2.10 | 8.13.0 |
+Detekt 2.0 is pre-release software: its alpha releases break binary compatibility of the
+rule-provider API between versions (for example, 2.0.0-alpha.2 renamed `RuleSet.Id` to
+`RuleSetId`, which is why rules 1.1.0 fails with `NoClassDefFoundError: dev/detekt/api/RuleSet$Id`
+on alpha.2+ engines). Each release of these rules is therefore compiled against a specific
+`detekt-api` and only works on detekt engines that are binary-compatible with it:
 
-See the [Detekt Compatibility Table](https://detekt.dev/docs/introduction/compatibility/) for the full matrix.
+| Rules version | Detekt engine (`toolVersion`) | Engine's embedded Kotlin | Min JVM |
+|---------------|-------------------------------|--------------------------|---------|
+| 1.2.0 | 2.0.0-alpha.4 – 2.0.0-alpha.5 | 2.4.0 | 11 |
+| 1.1.0 | 2.0.0-alpha.1 | 2.2.20 | 17 |
+| 1.0.x | 2.0.0-alpha.1 | 2.2.20 | 17 |
+
+Notes:
+
+- The detekt engine analyzes sources with its own embedded Kotlin compiler, so the engine
+  version — not your project's Kotlin version — determines which Kotlin language features
+  it can parse (a 2.4.0 engine happily analyzes Kotlin 2.3 code).
+- Rules 1.2.0 uses only API that is unchanged since 2.0.0-alpha.2, so it may also load on
+  alpha.2/alpha.3 engines, but it is built with Kotlin 2.4.0 and only tested on
+  alpha.4/alpha.5 — treat older engines as unsupported.
+- See the [Detekt Compatibility Table](https://detekt.dev/docs/introduction/compatibility/)
+  for which Gradle and JVM versions each detekt release supports.
 
 ### 1. Add Detekt plugin to root build.gradle.kts
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.2.20"  // Must match Detekt's Kotlin version
-    id("dev.detekt") version "2.0.0-alpha.1" apply false
+    kotlin("jvm") version "2.4.0"  // Your project's Kotlin — need not match the engine's
+    id("dev.detekt") version "2.0.0-alpha.5" apply false
 }
 ```
 
@@ -40,18 +56,20 @@ plugins {
     id("dev.detekt")
 }
 
-// Force detekt to use the Kotlin version it was compiled with
+// Force detekt's classpath onto the Kotlin version its engine was compiled with.
+// This must match the *engine's* embedded Kotlin (see the compatibility matrix above),
+// NOT your project's Kotlin version — the engine hard-refuses any other version.
 configurations.matching { it.name == "detekt" }.all {
     resolutionStrategy.eachDependency {
         if (requested.group == "org.jetbrains.kotlin") {
-            useVersion("2.2.20")
+            useVersion("2.4.0")
         }
     }
 }
 
 dependencies {
-    detektPlugins("community.flock:hexagonal-detekt-rules:1.1.0")
-    detektPlugins("community.flock:arrow-detekt-rules:1.1.0")  // optional
+    detektPlugins("community.flock:hexagonal-detekt-rules:1.2.0")
+    detektPlugins("community.flock:arrow-detekt-rules:1.2.0")  // optional
 }
 
 detekt {
@@ -95,12 +113,12 @@ directory, and `maven-antrun-plugin` runs the detekt CLI against them.
               <artifactItem>
                 <groupId>community.flock</groupId>
                 <artifactId>hexagonal-detekt-rules</artifactId>
-                <version>1.1.0</version>
+                <version>1.2.0</version>
               </artifactItem>
               <artifactItem>
                 <groupId>community.flock</groupId>
                 <artifactId>arrow-detekt-rules</artifactId>
-                <version>1.1.0</version>
+                <version>1.2.0</version>
               </artifactItem>
             </artifactItems>
           </configuration>
@@ -142,7 +160,7 @@ directory, and `maven-antrun-plugin` runs the detekt CLI against them.
         <dependency>
           <groupId>dev.detekt</groupId>
           <artifactId>detekt-cli</artifactId>
-          <version>2.0.0-alpha.1</version>
+          <version>2.0.0-alpha.5</version>
         </dependency>
       </dependencies>
     </plugin>
@@ -159,9 +177,9 @@ mvn verify
 The `detekt.yml` and the per-layer rule set configuration are identical to the Gradle
 setup — see [Configuration](#configuration) below.
 
-> **Note:** keep the `detekt-cli` version aligned with the Detekt version these rules
-> were built against (`2.0.0-alpha.1`). Because Detekt 2.0 is pinned to a specific Kotlin
-> version, a mismatched CLI can fail to load the rule jars.
+> **Note:** keep the `detekt-cli` version within the engine range these rules support
+> (see the [compatibility matrix](#compatibility)). Because Detekt 2.0 alphas break the
+> rule-provider API between releases, a mismatched CLI can fail to load the rule jars.
 
 ## Hexagonal Architecture RuleSets
 
