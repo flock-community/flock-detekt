@@ -4,10 +4,11 @@ import community.flock.detekt.hexagonal.rules.adapter.AdapterCannotDependOnAdapt
 import community.flock.detekt.hexagonal.rules.adapter.AdapterMustImplementPort
 import community.flock.detekt.hexagonal.rules.adapter.AdapterNamingConvention
 import dev.detekt.api.RuleSet
+import dev.detekt.api.RuleSetId
 import dev.detekt.api.RuleSetProvider
 
 class AdapterRuleSetProvider : RuleSetProvider {
-    override val ruleSetId: RuleSet.Id = RuleSet.Id("hexagonal-adapter")
+    override val ruleSetId: RuleSetId = RuleSetId("hexagonal-adapter")
 
     override fun instance(): RuleSet = RuleSet(
         ruleSetId,

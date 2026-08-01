@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "community.flock"
-    version = "1.2.0-SNAPSHOT"
+    version = "1.2.0"
 }
 
 nexusPublishing {
@@ -31,6 +31,12 @@ subprojects {
     configure<JavaPluginExtension> {
         withSourcesJar()
         withJavadocJar()
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 
     dependencies {
@@ -39,6 +45,21 @@ subprojects {
         "testImplementation"("dev.detekt:detekt-api:$detektVersion")
         "testImplementation"("dev.detekt:detekt-test:$detektVersion")
         "testImplementation"(kotlin("test"))
+
+        components {
+            // detekt-test 2.0.0-alpha.4/5 declares a runtime dependency on the
+            // dev.detekt:detekt-api-test-fixtures capability, but detekt-api's published
+            // metadata contains no test-fixtures variant (the fixtures jar is not published
+            // to Maven Central at all), which makes testRuntimeClasspath unresolvable.
+            // detekt-api is declared explicitly above, so dropping the leaked dependency is safe.
+            withModule("dev.detekt:detekt-test") {
+                withVariant("runtimeElements") {
+                    withDependencies {
+                        removeAll { it.group == "dev.detekt" && it.name == "detekt-api" }
+                    }
+                }
+            }
+        }
     }
 
     tasks.withType<Test> {

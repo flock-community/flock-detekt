@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.1.20"
-detekt = "2.0.0-alpha.1"
+kotlin = "2.4.0"
+detekt = "2.0.0-alpha.5"
 nexus-publish = "2.0.0"
 
 [plugins]
