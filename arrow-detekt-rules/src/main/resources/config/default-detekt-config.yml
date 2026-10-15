@@ -16,3 +16,45 @@ arrow:
     active: true
     domainPackages: ['domain', 'core']
     errorSuffixes: ['Error', 'Failure']
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable.
+  NoExceptionTypesInDomain:
+    active: false
+    domainPackages: ['domain', 'core']
+    exceptionTypes:
+      - 'Throwable'
+      - 'Exception'
+      - 'RuntimeException'
+      - 'Error'
+      - 'IllegalStateException'
+      - 'IllegalArgumentException'
+    exceptionSuffixes: ['Exception']
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable.
+  NoEitherInDomainSignatures:
+    active: false
+    domainPackages: ['domain', 'core']
+    forbiddenTypes: ['Either', 'arrow.core.Either']  # add 'kotlin.Result' to also forbid kotlin.Result
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable.
+  CatchAllMustRethrowCancellation:
+    active: false
+    catchAllTypes:
+      - 'Throwable'
+      - 'kotlin.Throwable'
+      - 'java.lang.Throwable'
+      - 'Exception'
+      - 'kotlin.Exception'
+      - 'java.lang.Exception'
+      - 'RuntimeException'
+      - 'kotlin.RuntimeException'
+      - 'java.lang.RuntimeException'
+      - 'IllegalStateException'
+      - 'kotlin.IllegalStateException'
+      - 'java.lang.IllegalStateException'
+    cancellationExceptionTypes:
+      - 'CancellationException'
+      - 'kotlin.coroutines.cancellation.CancellationException'
+      - 'kotlinx.coroutines.CancellationException'
+      - 'java.util.concurrent.CancellationException'
+    cancellationCheckCalls: ['ensureActive', 'nonFatalOrThrow']
