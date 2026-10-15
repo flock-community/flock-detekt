@@ -8,9 +8,11 @@ These rules are particularly useful for guiding **AI coding agents** (Copilot, C
 
 | Module | RuleSets | Rules | Purpose |
 |--------|----------|-------|---------|
-| `hexagonal-detekt-rules` | 5 | 16 | Enforce hexagonal/ports & adapters architecture |
-| `arrow-detekt-rules` | 1 | 3 | Enforce typed error handling with Arrow |
-| `wirespec-detekt-rules` | 1 | 2 | Enforce [Wirespec](https://wirespec.io)-generated interfaces in controllers |
+| `hexagonal-detekt-rules` | 5 | 20 | Enforce hexagonal/ports & adapters architecture |
+| `arrow-detekt-rules` | 1 | 6 | Enforce typed error handling with Arrow |
+| `wirespec-detekt-rules` | 1 | 4 | Enforce [Wirespec](https://wirespec.io)-generated interfaces in Spring controllers and Ktor endpoints |
+
+Rules marked **opt-in** are disabled by default; see [Opt-in rules](#opt-in-rules) for how to enable them.
 
 ## Installation
 
@@ -187,9 +189,9 @@ The hexagonal rules are organized into **5 layer-specific rulesets** that can be
 
 | RuleSet | Rules | Target Modules |
 |---------|-------|----------------|
-| `hexagonal-domain` | 5 | domain |
+| `hexagonal-domain` | 7 | domain |
 | `hexagonal-port` | 3 | domain |
-| `hexagonal-adapter` | 3 | adapters/* |
+| `hexagonal-adapter` | 4 | adapters/* |
 | `hexagonal-dependency` | 4 | varies |
 | `hexagonal-layering` | 2 | all |
 
@@ -202,6 +204,8 @@ The hexagonal rules are organized into **5 layer-specific rulesets** that can be
 | `DomainNoFrameworkImports` | Blocks Spring, Ktor, Jakarta, etc. imports in domain |
 | `DomainModelMustBeStandalone` | Allow-lists domain imports so foreign models can't leak in (opt-in) |
 | `ValueClassMustHaveJvmInline` | Requires `@JvmInline` on value classes |
+| `SmartConstructorMustHaveConsistentCopyVisibility` | Data classes with a non-public constructor need `@ConsistentCopyVisibility`, so `copy()` can't bypass the smart constructor (opt-in) |
+| `IdentifierMustBeValueClass` | Identifiers (`id`, `*Id`) must not be raw `String`/`Int`/`Long`/`UUID` — a low-noise alternative to `DomainNoPrimitiveObsession` (opt-in) |
 
 ### hexagonal-port
 
@@ -218,6 +222,7 @@ The hexagonal rules are organized into **5 layer-specific rulesets** that can be
 | `AdapterMustImplementPort` | Adapters must implement a port interface |
 | `AdapterNamingConvention` | Adapters must follow naming patterns (`*Adapter`, `*Impl`, `Mock*`) |
 | `AdapterCannotDependOnAdapter` | Prevents cross-adapter dependencies |
+| `AdapterCannotDependOnDomainServices` | Adapters may import domain ports and models, not domain services (opt-in) |
 
 ### hexagonal-dependency
 
@@ -242,6 +247,24 @@ The hexagonal rules are organized into **5 layer-specific rulesets** that can be
 | `NoThrowInDomainOrAdapters` | No throwing exceptions — use Arrow's `Raise` |
 | `DomainServiceMustUseRaise` | Public service functions must have `context(Raise<E>)` |
 | `ErrorTypeMustBeSealedInterface` | Error types must be sealed interfaces |
+| `NoExceptionTypesInDomain` | No exception classes in the domain — expected failures are typed errors (opt-in) |
+| `NoEitherInDomainSignatures` | Public domain signatures use `context(_: Raise<E>)`, not `Either` (opt-in) |
+| `CatchAllMustRethrowCancellation` | Catch-alls in suspend functions must rethrow `CancellationException` (opt-in) |
+
+`CatchAllMustRethrowCancellation` is a syntax-only counterpart of detekt's
+`coroutines>SuspendFunSwallowedCancellation`. The built-in rule needs type resolution, so it only
+runs in the type-resolving tasks (`detektMain`, `detektTest`), but it knows whether a `try` block
+really calls suspend functions and also covers `runCatching`. This rule runs in the plain
+`detekt` task too and assumes every `try` in a suspend function can be cancelled.
+
+## Wirespec Rules
+
+| Rule | Description |
+|------|-------------|
+| `ControllerMustImplementWirespecHandler` | Spring `@RestController`s must implement a Wirespec `Handler` |
+| `NoManualSpringMappingAnnotations` | Spring mapping annotations only on overridden Wirespec `Handler` methods |
+| `NoManualKtorRoutes` | No hand-written Ktor routes (`get("/path") { }`) — mount Wirespec handlers with `wirespec(handler)` (opt-in) |
+| `EndpointsMustImplementWirespecHandler` | Ktor `*Endpoints` classes must implement a Wirespec `Handler` (opt-in) |
 
 ## Configuration
 
@@ -358,6 +381,54 @@ hexagonal-dependency:
 hexagonal-layering:
   active: false
 ```
+
+### Opt-in rules
+
+The rules added in 1.3.0 are disabled by default, so upgrading does not fail existing builds.
+Detekt only runs a rule whose own configuration sets `active: true` (enabling the rule set
+alone is not enough), so enable each rule you want explicitly. Package options accept bare
+segment names (`domain`) as well as fully qualified prefixes (`com.example.platform.domain`):
+
+```yaml
+hexagonal-domain:
+  active: true
+  SmartConstructorMustHaveConsistentCopyVisibility:
+    active: true
+    domainPackages: ['com.example.platform.domain']
+  IdentifierMustBeValueClass:
+    active: true
+    domainPackages: ['com.example.platform.domain']
+
+hexagonal-adapter:
+  active: true
+  AdapterCannotDependOnDomainServices:
+    active: true
+    adapterPackages: ['com.example.database', 'com.example.integrations']
+    domainPackages: ['com.example.platform.domain']
+
+arrow:
+  active: true
+  NoExceptionTypesInDomain:
+    active: true
+    domainPackages: ['com.example.platform.domain']
+  NoEitherInDomainSignatures:
+    active: true
+    domainPackages: ['com.example.platform.domain']
+  CatchAllMustRethrowCancellation:
+    active: true
+
+wirespec:
+  active: true
+  NoManualKtorRoutes:
+    active: true
+    apiPackages: ['com.example.platform.api']
+    allowedPaths: ['/orders/{orderId}/events']  # e.g. an SSE stream Wirespec cannot model
+  EndpointsMustImplementWirespecHandler:
+    active: true
+    apiPackages: ['com.example.platform.api']
+```
+
+All options and their defaults are listed in each module's `src/main/resources/config/*.yml`.
 
 ## Architecture Enforced
 
