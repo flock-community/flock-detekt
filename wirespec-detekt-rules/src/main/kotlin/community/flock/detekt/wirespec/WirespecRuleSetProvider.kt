@@ -1,6 +1,8 @@
 package community.flock.detekt.wirespec
 
 import community.flock.detekt.wirespec.rules.ControllerMustImplementWirespecHandler
+import community.flock.detekt.wirespec.rules.EndpointsMustImplementWirespecHandler
+import community.flock.detekt.wirespec.rules.NoManualKtorRoutes
 import community.flock.detekt.wirespec.rules.NoManualSpringMappingAnnotations
 import dev.detekt.api.RuleSet
 import dev.detekt.api.RuleSetId
@@ -14,6 +16,8 @@ class WirespecRuleSetProvider : RuleSetProvider {
         listOf(
             ::ControllerMustImplementWirespecHandler,
             ::NoManualSpringMappingAnnotations,
+            ::NoManualKtorRoutes,
+            ::EndpointsMustImplementWirespecHandler,
         )
     )
 }

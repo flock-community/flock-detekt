@@ -18,6 +18,19 @@ object WirespecConfig {
         "RequestMapping"
     )
     val DEFAULT_EXCLUDE_PACKAGES = listOf("actuator", "health", "management", "test")
+    val DEFAULT_KTOR_ROUTE_BUILDERS = listOf(
+        "get",
+        "post",
+        "put",
+        "patch",
+        "delete",
+        "head",
+        "options",
+        "route",
+        "sse",
+        "webSocket"
+    )
+    val DEFAULT_ENDPOINT_CLASS_PATTERNS = listOf(".*Endpoints", ".*Endpoint")
 
     /**
      * Checks if the given file belongs to a package matching one of the patterns.

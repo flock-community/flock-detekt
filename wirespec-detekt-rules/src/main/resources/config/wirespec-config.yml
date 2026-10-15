@@ -13,3 +13,19 @@ wirespec:
     mappingAnnotations: ['GetMapping', 'PostMapping', 'PutMapping', 'DeleteMapping', 'PatchMapping', 'RequestMapping']
     excludePackages: ['actuator', 'health', 'management', 'test']
     allowOnOverrides: true
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable. Ktor counterpart of NoManualSpringMappingAnnotations.
+  NoManualKtorRoutes:
+    active: false
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    excludePackages: ['actuator', 'health', 'management', 'test']
+    routeBuilders: ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'route', 'sse', 'webSocket']
+    allowedPaths: []  # exact paths Wirespec cannot model, e.g. a Server-Sent Events stream
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable. Ktor counterpart of ControllerMustImplementWirespecHandler.
+  EndpointsMustImplementWirespecHandler:
+    active: false
+    apiPackages: ['api', 'controller', 'controllers', 'rest']
+    excludePackages: ['actuator', 'health', 'management', 'test']
+    endpointClassPatterns: ['.*Endpoints', '.*Endpoint']
+    allowedSupertypes: []  # regular expressions for supertypes that also satisfy the rule
