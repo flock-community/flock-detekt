@@ -101,7 +101,16 @@ subprojects {
     val isSigningEnabled: Boolean = System.getenv("ENABLE_GRADLE_SIGNING")?.toBoolean() ?: true
     if (isSigningEnabled) {
         configure<SigningExtension> {
-            useGpgCmd()
+            // CI passes the armored key in the environment (as kmapper does): Gradle's in-memory
+            // signer uses it directly, without the gpg binary, which refuses an expired key.
+            // Locally, sign with the gpg agent as before.
+            val signingKey = System.getenv("GPG_PRIVATE_KEY")
+            val signingPassphrase = System.getenv("GPG_PASSPHRASE")
+            if (signingKey != null && signingPassphrase != null) {
+                useInMemoryPgpKeys(signingKey, signingPassphrase)
+            } else {
+                useGpgCmd()
+            }
             sign(extensions.getByType<PublishingExtension>().publications["maven"])
         }
     }
