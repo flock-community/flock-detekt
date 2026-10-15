@@ -1,7 +1,10 @@
 package community.flock.detekt.arrow
 
+import community.flock.detekt.arrow.rules.CatchAllMustRethrowCancellation
 import community.flock.detekt.arrow.rules.DomainServiceMustUseRaise
 import community.flock.detekt.arrow.rules.ErrorTypeMustBeSealedInterface
+import community.flock.detekt.arrow.rules.NoEitherInDomainSignatures
+import community.flock.detekt.arrow.rules.NoExceptionTypesInDomain
 import community.flock.detekt.arrow.rules.NoThrowInDomainOrAdapters
 import dev.detekt.api.RuleSet
 import dev.detekt.api.RuleSetId
@@ -15,7 +18,10 @@ class ArrowRuleSetProvider : RuleSetProvider {
         listOf(
             ::NoThrowInDomainOrAdapters,
             ::DomainServiceMustUseRaise,
-            ::ErrorTypeMustBeSealedInterface
+            ::ErrorTypeMustBeSealedInterface,
+            ::NoExceptionTypesInDomain,
+            ::NoEitherInDomainSignatures,
+            ::CatchAllMustRethrowCancellation,
         )
     )
 }

@@ -112,6 +112,28 @@ object HexagonalConfig {
     }
 
     /**
+     * Returns the segments of [path] that follow the first of [packagePatterns] it contains,
+     * or `null` when [path] is not inside any of them.
+     *
+     * Patterns are matched on package-segment boundaries, so both bare segment names
+     * (`domain`) and fully qualified prefixes (`com.example.domain`) work, exactly like
+     * [fileIsInPackage]. For `com.example.domain.user.service.UserService` and the pattern
+     * `domain` this returns `[user, service, UserService]`.
+     */
+    fun segmentsAfterPackage(path: String, packagePatterns: List<String>): List<String>? {
+        for (pattern in packagePatterns) {
+            val rest = when {
+                path == pattern || path.endsWith(".$pattern") -> ""
+                path.startsWith("$pattern.") -> path.removePrefix("$pattern.")
+                path.contains(".$pattern.") -> path.substringAfter(".$pattern.")
+                else -> continue
+            }
+            return if (rest.isEmpty()) emptyList() else rest.split(".")
+        }
+        return null
+    }
+
+    /**
      * Checks if a class name matches one of the given patterns.
      */
     fun classNameMatchesPattern(className: String, patterns: List<String>): Boolean {

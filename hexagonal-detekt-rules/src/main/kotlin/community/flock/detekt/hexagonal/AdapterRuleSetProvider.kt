@@ -1,6 +1,7 @@
 package community.flock.detekt.hexagonal
 
 import community.flock.detekt.hexagonal.rules.adapter.AdapterCannotDependOnAdapter
+import community.flock.detekt.hexagonal.rules.adapter.AdapterCannotDependOnDomainServices
 import community.flock.detekt.hexagonal.rules.adapter.AdapterMustImplementPort
 import community.flock.detekt.hexagonal.rules.adapter.AdapterNamingConvention
 import dev.detekt.api.RuleSet
@@ -16,6 +17,7 @@ class AdapterRuleSetProvider : RuleSetProvider {
             ::AdapterMustImplementPort,
             ::AdapterNamingConvention,
             ::AdapterCannotDependOnAdapter,
+            ::AdapterCannotDependOnDomainServices,
         )
     )
 }

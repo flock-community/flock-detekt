@@ -15,3 +15,11 @@ hexagonal-adapter:
   AdapterCannotDependOnAdapter:
     active: true
     adapterPackages: ['adapter', 'adapters', 'infrastructure']
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable.
+  AdapterCannotDependOnDomainServices:
+    active: false
+    adapterPackages: ['adapter', 'adapters', 'infrastructure']
+    domainPackages: ['domain', 'core']
+    servicePackages: ['service', 'services']
+    serviceSuffixes: ['Service']
