@@ -38,3 +38,27 @@ hexagonal-domain:
     active: true
     domainPackages: ['domain', 'core']
     checkOnlyInDomain: false  # Check all value classes by default
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable.
+  SmartConstructorMustHaveConsistentCopyVisibility:
+    active: false
+    domainPackages: ['domain', 'core']
+
+  # Opt-in (new in 1.3.0): set `active: true` to enable.
+  IdentifierMustBeValueClass:
+    active: false
+    domainPackages: ['domain', 'core']
+    identifierNamePattern: '^id$|.*Id$'
+    rawTypes:
+      - 'String'
+      - 'Int'
+      - 'Long'
+      - 'UUID'
+      - 'java.util.UUID'
+      - 'Uuid'
+      - 'kotlin.uuid.Uuid'
+      - 'kotlin.String'
+      - 'kotlin.Int'
+      - 'kotlin.Long'
+    checkIdCollections: false  # also check the element type of `*Ids` collections
+    idCollectionNamePattern: '^ids$|.*Ids$'

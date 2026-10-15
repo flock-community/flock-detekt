@@ -4,6 +4,8 @@ import community.flock.detekt.hexagonal.rules.domain.DomainModelMustBeStandalone
 import community.flock.detekt.hexagonal.rules.domain.DomainMustBeImmutable
 import community.flock.detekt.hexagonal.rules.domain.DomainNoFrameworkImports
 import community.flock.detekt.hexagonal.rules.domain.DomainNoPrimitiveObsession
+import community.flock.detekt.hexagonal.rules.domain.IdentifierMustBeValueClass
+import community.flock.detekt.hexagonal.rules.domain.SmartConstructorMustHaveConsistentCopyVisibility
 import community.flock.detekt.hexagonal.rules.domain.ValueClassMustHaveJvmInline
 import dev.detekt.api.RuleSet
 import dev.detekt.api.RuleSetId
@@ -20,6 +22,8 @@ class DomainRuleSetProvider : RuleSetProvider {
             ::DomainModelMustBeStandalone,
             ::DomainMustBeImmutable,
             ::ValueClassMustHaveJvmInline,
+            ::SmartConstructorMustHaveConsistentCopyVisibility,
+            ::IdentifierMustBeValueClass,
         )
     )
 }
